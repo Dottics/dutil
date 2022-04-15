@@ -41,5 +41,20 @@ func Inst(e Error) *Err {
 	}
 	return &Err{
 		Status: 500,
+		Errors: make(map[string][]string),
 	}
+}
+
+// ErrorEqual compares whether two errors are equal
+//
+// err1 and err2 are converted to Err instances then the Error() method
+// is called to create a comparable string, the two error strings are
+// compared and the boolean result is return.
+func ErrorEqual(err1, err2 Error) bool {
+	e1 := Inst(err1)
+	e2 := Inst(err2)
+	if e1.Error() == e2.Error() {
+		return true
+	}
+	return false
 }

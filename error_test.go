@@ -1,6 +1,7 @@
 package dutil
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -87,7 +88,81 @@ func TestInst(t *testing.T) {
 	if e4.Status != 500 {
 		t.Errorf("expected %d got %d", 500, e4.Status)
 	}
-	if e4.Errors != nil {
-		t.Errorf("expected %v got %v", nil, e4.Errors)
+	if len(e4.Errors) != 0 {
+		t.Errorf("expected no errors got %v", e4.Errors)
+	}
+}
+
+func TestErrorEqual(t *testing.T) {
+	tests := []struct {
+		name   string
+		err1   Error
+		err2   Error
+		result bool
+	}{
+		{
+			name:   "nil nil",
+			err1:   nil,
+			err2:   nil,
+			result: true,
+		},
+		{
+			name: "Error nil",
+			err1: &Err{
+				Errors: map[string][]string{
+					"key": {"error description"},
+				},
+			},
+			err2:   nil,
+			result: false,
+		},
+		{
+			name: "nil Error",
+			err1: nil,
+			err2: &Err{
+				Errors: map[string][]string{
+					"key": {"error description"},
+				},
+			},
+			result: false,
+		},
+		{
+			name: "Error Error Same",
+			err1: &Err{
+				Errors: map[string][]string{
+					"key": {"error description"},
+				},
+			},
+			err2: &Err{
+				Errors: map[string][]string{
+					"key": {"error description"},
+				},
+			},
+			result: true,
+		},
+		{
+			name: "Error Error Different",
+			err1: &Err{
+				Errors: map[string][]string{
+					"key": {"error description"},
+				},
+			},
+			err2: &Err{
+				Errors: map[string][]string{
+					"key": {"error description different"},
+				},
+			},
+			result: false,
+		},
+	}
+
+	for i, tc := range tests {
+		name := fmt.Sprintf("%d %s", i, tc.name)
+		t.Run(name, func(t *testing.T) {
+			o := ErrorEqual(tc.err1, tc.err2)
+			if o != tc.result {
+				t.Errorf("expected %v got %v", tc.result, o)
+			}
+		})
 	}
 }
